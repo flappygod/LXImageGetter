@@ -26,6 +26,8 @@ public class BitMapCache {
     private LinkedHashMap<String, SoftReference<Bitmap>> mSoftCache;
     /* 最大的缓存限制 M为单位 */
     private int maxLruSize = 8;
+    /* 最小的缓存限制 M为单位 */
+    private int minLruSize =1;
 
     /******
      * 构造器
@@ -71,9 +73,13 @@ public class BitMapCache {
         UseMemorySize = UseMemorySize - total + free;
         //使用最大可用的四分之一，不多
         UseMemorySize = (UseMemorySize / 4) > maxLruSize ? maxLruSize : (UseMemorySize / 4);
-
+        // 修改部分情况下拿到的可用内存为零
+        if(UseMemorySize<=0){
+            UseMemorySize=minLruSize;
+        }
 		/* 硬引用缓存容量，用KB表示 */
         long cacheSize = 1024 * UseMemorySize;
+
         // 创建 mLruCache
         mLruCache = new LruCache<String, Bitmap>((int) cacheSize) {
             @Override
