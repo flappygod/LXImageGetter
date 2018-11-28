@@ -26,14 +26,12 @@ public class ClearCacheThread extends Thread{
 		this.path=path;
 		this.handler=handler;
 	}
-	
-	
+
 	public void run() {
 		try {
 			DirTool.deleteDirFiles(path, false);
 			handler.sendEmptyMessage(1);
 		} catch (Exception e) {
-			e.printStackTrace();
 			Message msg=handler.obtainMessage(0,e);
 			handler.sendMessage(msg);
 		}
