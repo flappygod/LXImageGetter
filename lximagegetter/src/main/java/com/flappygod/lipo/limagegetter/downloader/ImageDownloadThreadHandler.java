@@ -102,8 +102,9 @@ public class ImageDownloadThreadHandler extends Handler {
     public void handleMessage(Message msg) {
         // 下载出错
         if (msg.what == ThreadMessageWhat.ERROR.nCode) {
-            if (callBack != null)
+            if (callBack != null) {
                 callBack.downLoadError((Exception) msg.obj);
+            }
         }
         // 下载完成
         else if (msg.what == ThreadMessageWhat.DONE.nCode) {
@@ -117,10 +118,10 @@ public class ImageDownloadThreadHandler extends Handler {
                 }
                 // 判断不为空
                 if (builder != null && imageview != null) {
-                    Animation animation = builder
-                            .buildAnimation(imageview, ImageSourceType.FROM_NET);
-                    if (animation != null)
+                    Animation animation = builder.buildAnimation(imageview, ImageSourceType.FROM_NET);
+                    if (animation != null) {
                         imageview.startAnimation(animation);
+                    }
                 }
             }
              // 回调
@@ -141,10 +142,10 @@ public class ImageDownloadThreadHandler extends Handler {
                 }
                 // 判断不为空
                 if (builder != null && imageview != null) {
-                    Animation animation = builder
-                            .buildAnimation(imageview, ImageSourceType.FROM_SDCARD);
-                    if (animation != null)
+                    Animation animation = builder.buildAnimation(imageview, ImageSourceType.FROM_SDCARD);
+                    if (animation != null) {
                         imageview.startAnimation(animation);
+                    }
                 }
             }
             // 回调

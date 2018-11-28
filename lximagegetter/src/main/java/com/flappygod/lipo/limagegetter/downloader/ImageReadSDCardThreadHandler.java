@@ -115,8 +115,9 @@ public class ImageReadSDCardThreadHandler extends Handler {
 				// 判断不为空
 				if (imageview != null && builder != null) {
 					Animation animation=builder.buildAnimation(imageview,ImageSourceType.FROM_SDCARD);
-					if(animation!=null)
-					imageview.startAnimation(animation);
+					if(animation!=null) {
+						imageview.startAnimation(animation);
+					}
 				}
 			}
 

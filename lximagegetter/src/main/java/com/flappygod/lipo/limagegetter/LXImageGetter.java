@@ -540,10 +540,10 @@ public class LXImageGetter {
                 }
                 // 开始动画
                 if (builder != null && image != null) {
-                    Animation animation = builder.buildAnimation(image,
-                            ImageSourceType.FROM_CACHE);
-                    if (animation != null)
+                    Animation animation = builder.buildAnimation(image,ImageSourceType.FROM_CACHE);
+                    if (animation != null) {
                         image.startAnimation(animation);
+                    }
                 }
                 // 结束
                 return;
@@ -642,10 +642,10 @@ public class LXImageGetter {
                 }
                 // 开始动画
                 if (builder != null && image != null) {
-                    Animation animation = builder.buildAnimation(image,
-                            ImageSourceType.FROM_CACHE);
-                    if (animation != null)
+                    Animation animation = builder.buildAnimation(image,ImageSourceType.FROM_CACHE);
+                    if (animation != null) {
                         image.startAnimation(animation);
+                    }
                 }
                 // 结束
                 return;
