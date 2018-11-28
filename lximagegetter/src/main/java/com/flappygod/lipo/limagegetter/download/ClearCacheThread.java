@@ -1,4 +1,4 @@
-package com.flappygod.lipo.limagegetter.downloader;
+package com.flappygod.lipo.limagegetter.download;
 
 import com.flappygod.lipo.limagegetter.tools.DirTool;
 

@@ -79,11 +79,11 @@ public class FileSizeTool {
 	/**
 	 * 获取指定文件大小
 	 * 
-	 * @param f
+	 * @param file
 	 * @return
 	 * @throws Exception
 	 */
-	private static long getFileSize(File file) throws Exception {
+	public static long getFileSize(File file) throws Exception {
 		long size = 0;
 		if (file.exists()) {
 			FileInputStream fis = null;

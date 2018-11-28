@@ -1,4 +1,4 @@
-package com.flappygod.lipo.limagegetter.downloader;
+package com.flappygod.lipo.limagegetter.download;
 
 import android.graphics.Bitmap;
 import android.os.Handler;
