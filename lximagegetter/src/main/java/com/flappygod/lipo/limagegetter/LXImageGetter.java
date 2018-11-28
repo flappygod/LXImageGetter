@@ -635,7 +635,7 @@ public class LXImageGetter {
 
         } else {
             // 返回通知文件不存在
-            callback.readError(new LDirException("no file exsists or file is directory"));
+            callback.readError(new LDirException("No file exsists or file is directory"));
         }
     }
 
