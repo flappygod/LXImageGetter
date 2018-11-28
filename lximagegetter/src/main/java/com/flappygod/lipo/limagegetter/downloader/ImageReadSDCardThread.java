@@ -9,8 +9,7 @@ import android.widget.ImageView;
 
 import com.flappygod.lipo.limagegetter.animation.AnimationBuilder;
 import com.flappygod.lipo.limagegetter.callback.LXReadSDCardCallback;
-import com.flappygod.lipo.limagegetter.option.LXImageReadSize;
-import com.flappygod.lipo.limagegetter.tools.BitmapRadiusTool;
+import com.flappygod.lipo.limagegetter.option.LXImageReadOption;
 import com.flappygod.lipo.limagegetter.tools.ImageReadTool;
 import com.flappygod.lipo.limagegetter.tools.BitMapCache;
 
@@ -29,7 +28,7 @@ public class ImageReadSDCardThread extends Thread {
 	/* 上下文 */
 	protected Context mcontext;
 	/* 文件名称 */
-	protected LXImageReadSize ImageReadedSize;
+	protected LXImageReadOption ImageReadedSize;
 
 	/************
 	 * 构造函数
@@ -51,7 +50,7 @@ public class ImageReadSDCardThread extends Thread {
 								 Context mcontext,
 								 BitMapCache cache,
 								 String path,
-								 LXImageReadSize ImageReadedSize,
+								 LXImageReadOption ImageReadedSize,
 								 LXReadSDCardCallback callback) {
 		// 设置弱应用
 		this.mimageview = new WeakReference<ImageView>(image);
@@ -150,7 +149,7 @@ public class ImageReadSDCardThread extends Thread {
 				cached = cache.getBitmapFromCache(downImagePath);
 			} else {
 				// 获取这个特定宽高的缓存
-				cached = cache.getBitmapFromCache(downImagePath+ ImageReadedSize.getSizeStrAdditional());
+				cached = cache.getBitmapFromCache(downImagePath+ ImageReadedSize.getOptionAdditional());
 			}
 			// 如果缓存不为空
 			if (cached != null) {
@@ -190,7 +189,7 @@ public class ImageReadSDCardThread extends Thread {
 					cache.addBitmapToCache(downImagePath, bitmap);
 				} else {
 					cache.addBitmapToCache(
-							downImagePath + ImageReadedSize.getSizeStrAdditional(), bitmap);
+							downImagePath + ImageReadedSize.getOptionAdditional(), bitmap);
 				}
 				// 结束
 				return;

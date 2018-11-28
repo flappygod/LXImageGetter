@@ -108,15 +108,13 @@ public class ImageDownloadThreadHandler extends Handler {
         }
         // 下载完成
         else if (msg.what == ThreadMessageWhat.DONE.nCode) {
-
             if (showImageFlag) {
-                ImageView imageview = (mimageview != null ? mimageview.get()
-                        : null);
+                ImageView imageview = (mimageview != null ? mimageview.get(): null);
                 // 获取imageView,设置图片
                 if (imageview != null && msg.obj != null && msg.obj instanceof Bitmap) {
                     imageview.setImageBitmap((Bitmap) msg.obj);
                 }
-                // 判断不为空
+                // 开始动画
                 if (builder != null && imageview != null) {
                     Animation animation = builder.buildAnimation(imageview, ImageSourceType.FROM_NET);
                     if (animation != null) {
@@ -126,21 +124,18 @@ public class ImageDownloadThreadHandler extends Handler {
             }
              // 回调
             if (callBack != null) {
-                callBack.downLoadReady(urlStr,
-                        NameTool.getImagePath(mDirpath, urlStr, imageName),
-                        (Bitmap) msg.obj);
+                callBack.downLoadReady(urlStr, NameTool.getImageAbsolutePath(mDirpath, urlStr, imageName),(Bitmap) msg.obj);
             }
         }
         // 从SD卡读取完成的
         else if (msg.what == ThreadMessageWhat.DONESDCARD.nCode) {
             if (showImageFlag) {
-                ImageView imageview = (mimageview != null ? mimageview.get()
-                        : null);
+                ImageView imageview = (mimageview != null ? mimageview.get(): null);
                 // 获取imageView,设置图片
                 if (imageview != null && msg.obj != null && msg.obj instanceof Bitmap) {
                     imageview.setImageBitmap((Bitmap) msg.obj);
                 }
-                // 判断不为空
+                // 开始动画
                 if (builder != null && imageview != null) {
                     Animation animation = builder.buildAnimation(imageview, ImageSourceType.FROM_SDCARD);
                     if (animation != null) {
@@ -150,20 +145,20 @@ public class ImageDownloadThreadHandler extends Handler {
             }
             // 回调
             if (callBack != null) {
-                callBack.downLoadReady(urlStr,
-                        NameTool.getImagePath(mDirpath, urlStr, imageName),
-                        (Bitmap) msg.obj);
+                callBack.downLoadReady(urlStr,NameTool.getImageAbsolutePath(mDirpath, urlStr, imageName),(Bitmap) msg.obj);
             }
         }
         // 下载中
         else if (msg.what == ThreadMessageWhat.DOWNLOADING.nCode) {
-            if (callBack != null)
+            if (callBack != null) {
                 callBack.downLoading(msg.arg1);
+            }
         }
         // 下载被取消
         else if (msg.what == ThreadMessageWhat.CANCEL.nCode) {
-            if (callBack != null)
+            if (callBack != null) {
                 callBack.downLoadingCanceled();
+            }
         }
 
     }

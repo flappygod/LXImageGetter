@@ -2,7 +2,6 @@ package com.flappygod.lipo.limagegetter;
 
 import android.content.Context;
 import android.graphics.Bitmap;
-import android.os.Environment;
 import android.view.animation.Animation;
 import android.widget.ImageView;
 
@@ -16,7 +15,8 @@ import com.flappygod.lipo.limagegetter.downloader.ClearCacheThread;
 import com.flappygod.lipo.limagegetter.downloader.ClearCacheThreadHandler;
 import com.flappygod.lipo.limagegetter.downloader.ImageDownloadThread;
 import com.flappygod.lipo.limagegetter.downloader.ImageReadSDCardThread;
-import com.flappygod.lipo.limagegetter.option.LXImageReadSize;
+import com.flappygod.lipo.limagegetter.exception.LDirException;
+import com.flappygod.lipo.limagegetter.option.LXImageReadOption;
 import com.flappygod.lipo.limagegetter.option.LXOption.ImageCacheOption;
 import com.flappygod.lipo.limagegetter.threadpool.ExcutePoolExecutor;
 import com.flappygod.lipo.limagegetter.tools.BitMapCache;
@@ -29,7 +29,6 @@ import com.flappygod.lipo.limagegetter.tools.NameTool;
 import java.io.File;
 import java.util.List;
 
-import static com.flappygod.lipo.limagegetter.option.LXOption.NO_PLACEHOLER;
 
 /**********
  * Package Name:com.flappygod.lipo.limagegetter <br/>
@@ -172,7 +171,7 @@ public class LXImageGetter {
      */
     public String getImageSDpath(String URl, String name) {
         // 取得这个被保存的文件名
-        String downImagePath = NameTool.getImagePath(mDirpath, URl, name);
+        String downImagePath = NameTool.getImageAbsolutePath(mDirpath, URl, name);
         return downImagePath;
     }
 
@@ -248,15 +247,15 @@ public class LXImageGetter {
     public static String getDefaultDirPath(Context context) {
         String cachePath = null;
         try {
-            if (context.getExternalCacheDir()!=null) {
+            if (context.getExternalCacheDir() != null) {
                 cachePath = context.getExternalCacheDir().getPath() + "/imagecache/";
-            } else if(context.getCacheDir()!=null){
+            } else if (context.getCacheDir() != null) {
                 cachePath = context.getCacheDir().getPath() + "/imagecache/";
             }
-        }catch (Exception e){
-            cachePath="";
+        } catch (Exception e) {
+            cachePath = "";
         }
-        return cachePath==null? "":cachePath;
+        return cachePath == null ? "" : cachePath;
     }
 
     /************
@@ -337,44 +336,29 @@ public class LXImageGetter {
      *
      * @param url             地址
      * @param imageName       用户自由设置的保存的文件名
-     * @param ImageReadedSize 读取的大小设置
+     * @param imageReadOption 读取的大小设置
      * @return
      */
-    public Bitmap getCachedUrlBitmap(String url, String imageName, LXImageReadSize ImageReadedSize) {
-        // 取得这个被保存的文件名
-        String downImagePath = NameTool.getImagePath(mDirpath, url, imageName);
-        Bitmap cached = null;
-        // 如果说没有大小的设置，那么就直接取缓存中的图片出来
-        if (ImageReadedSize == null) {
-            cached = mCache.getBitmapFromCache(downImagePath);
-        } else {
-            // 如果设置了就多加上大小
-            cached = mCache.getBitmapFromCache(downImagePath
-                    + ImageReadedSize.getSizeStrAdditional());
-        }
+    public Bitmap getCachedUrlBitmap(String url, String imageName, LXImageReadOption imageReadOption) {
+        // 取得这个被保存的文件的key值
+        Bitmap cached = mCache.getBitmapFromCache(NameTool.getImageAbsoluteKey(mDirpath, url, imageName, imageReadOption));
+        //返回缓存
         return cached;
     }
 
     /*******************
-     * 获取SD卡中已经缓存的数量
+     * 获取SD卡中已经缓存的图片
      *
      * @param url             地址
      * @param imageName       用户自由设置的保存的文件名
      * @param ImageReadedSize 读取图片的大小
      * @return
      */
-    public Bitmap getSDedUrlBitmap(String url, String imageName, LXImageReadSize ImageReadedSize) throws Exception {
-        Bitmap bitmap = getCachedUrlBitmap(url, imageName, ImageReadedSize);
-        if (bitmap == null) {
-            // 取得这个被保存的文件名
-            String downImagePath = NameTool.getImagePath(mDirpath, url, imageName);
-            // 读取图片
-            bitmap = ImageReadTool.readFileBitmap(downImagePath,
-                    ImageReadedSize);
-            return bitmap;
-        } else {
-            return bitmap;
-        }
+    public Bitmap getSDedUrlBitmap(String url, String imageName, LXImageReadOption ImageReadedSize) throws Exception {
+        // 读取图片
+        bitmap = ImageReadTool.readFileBitmap(NameTool.getImageAbsolutePath(mDirpath, url, imageName), ImageReadedSize);
+        //返回bitmap
+        return bitmap;
     }
 
 
@@ -388,7 +372,7 @@ public class LXImageGetter {
                                 final String URl) {
         getImageWithUrl(image,
                 URl,
-                NO_PLACEHOLER,
+                null,
                 null,
                 null,
                 null,
@@ -405,7 +389,7 @@ public class LXImageGetter {
      */
     public void getImageWithUrl(final ImageView image,
                                 final String URl,
-                                int placeHolder) {
+                                Bitmap placeHolder) {
         getImageWithUrl(image,
                 URl,
                 placeHolder,
@@ -418,7 +402,7 @@ public class LXImageGetter {
 
     public void getImageWithUrl(final ImageView image,
                                 final String URl,
-                                int placeHolder,
+                                Bitmap placeHolder,
                                 LXDownloadCallback callback) {
         getImageWithUrl(image,
                 URl,
@@ -440,9 +424,9 @@ public class LXImageGetter {
      */
     public void getImageWithUrl(final ImageView image,
                                 final String URl,
-                                int placeHolder,
+                                Bitmap placeHolder,
                                 LXDownloadCallback callback,
-                                LXImageReadSize ImageReadedSize) {
+                                LXImageReadOption ImageReadedSize) {
         getImageWithUrl(image,
                 URl,
                 placeHolder,
@@ -454,9 +438,9 @@ public class LXImageGetter {
 
     public void getImageWithUrl(final ImageView image,
                                 final String URl,
-                                int placeHolder,
+                                Bitmap placeHolder,
                                 LXDownloadCallback callback,
-                                LXImageReadSize ImageReadedSize,
+                                LXImageReadOption ImageReadedSize,
                                 ImageCacheOption option) {
         getImageWithUrl(image,
                 URl,
@@ -480,9 +464,9 @@ public class LXImageGetter {
      */
     public void getImageWithUrl(final ImageView image,
                                 final String URl,
-                                int placeHolder,
+                                Bitmap placeHolder,
                                 LXDownloadCallback callback,
-                                LXImageReadSize imageReadSize,
+                                LXImageReadOption imageReadSize,
                                 ImageCacheOption option,
                                 String imageName) {
 
@@ -491,43 +475,38 @@ public class LXImageGetter {
 
         /* 首先清除掉图片的动画 */
         if (image != null) {
+            //清除图片动画
             image.clearAnimation();
-            image.setImageBitmap(bitmap);
+            //判断占位是否为空
+            if (placeHolder == null) {
+                image.setImageBitmap(bitmap);
+            } else {
+                image.setImageBitmap(placeHolder);
+            }
         }
 
-        // 取得这个被保存的文件名
-        String downImagePath = NameTool.getImagePath(mDirpath, URl, imageName);
+        // 取得被保存的文件的绝对路径
+        String absouluteSDPath = NameTool.getImageAbsolutePath(mDirpath, URl, imageName);
+        // 取得被保存的文件的绝对键值
+        String absouluteKeyName = NameTool.getImageAbsoluteKey(mDirpath, URl, imageName, imageReadSize);
 
-        // 假如需要刷新
+        // 假如需要刷新这个数据
         if (option != null && option == ImageCacheOption.REFRESH_CACHE) {
             // 删除本地文件
-            if (ImageReadTool.isFileExsitsAntNotDic(downImagePath)) {
+            if (ImageReadTool.isFileExsitsAntNotDic(absouluteSDPath)) {
+                // 从缓存中同样也移除当前的图片的缓存
+                mCache.removeBitmapFromCache(absouluteKeyName);
                 // 删除这个文件
-                File file = new File(downImagePath);
+                File file = new File(absouluteSDPath);
+                //删除
                 file.delete();
-                // 如果说没有大小的设置，那么就直接取缓存中的图片出来
-                if (imageReadSize == null) {
-                    mCache.removeBitmapFromCache(downImagePath);
-                } else {
-                    // 如果设置了就多加上大小
-                    mCache.removeBitmapFromCache(downImagePath
-                            + imageReadSize.getMaxWidth()
-                            + "*"
-                            + imageReadSize.getMaxHeight());
-                }
             }
         }
 
+
         // 如果SD卡中已经存在了这个文件
-        if (ImageReadTool.isFileExsitsAntNotDic(downImagePath)) {
-            Bitmap cached = null;
-            // 如果说没有大小的设置，那么就直接取缓存中的图片出来
-            if (imageReadSize == null) {
-                cached = mCache.getBitmapFromCache(downImagePath);
-            } else {
-                // 如果设置了就多加上大小
-                cached = mCache.getBitmapFromCache(downImagePath + imageReadSize.getSizeStrAdditional());
-            }
+        if (ImageReadTool.isFileExsitsAntNotDic(absouluteSDPath)) {
+            Bitmap cached = mCache.getBitmapFromCache(absouluteKeyName);
             // 如果缓存不为空
             if (cached != null) {
                 // 设置到Image中去
@@ -536,11 +515,11 @@ public class LXImageGetter {
                 }
                 // 直接回调完成的方法
                 if (callback != null) {
-                    callback.downLoadReady(URl, downImagePath, cached);
+                    callback.downLoadReady(URl, absouluteSDPath, cached);
                 }
                 // 开始动画
                 if (builder != null && image != null) {
-                    Animation animation = builder.buildAnimation(image,ImageSourceType.FROM_CACHE);
+                    Animation animation = builder.buildAnimation(image, ImageSourceType.FROM_CACHE);
                     if (animation != null) {
                         image.startAnimation(animation);
                     }
@@ -548,16 +527,12 @@ public class LXImageGetter {
                 // 结束
                 return;
             }
+        }
 
-        }
-        /* 设置holder */
-        if (image != null && placeHolder > -1) {
-            image.setImageResource(placeHolder);
-        }
 
         // 开启下载的线程
-        ImageDownloadThread thread = new ImageDownloadThread(image, mcontext,
-                mCache, URl, mDirpath, imageName, imageReadSize, callback);
+        ImageDownloadThread thread = new ImageDownloadThread(image, mcontext, mCache, URl, mDirpath, imageName, imageReadSize, callback);
+        //设置cookie
         thread.setCookieHolder(cookieHolder);
         // 设置下载完成显示的动画
         thread.setAnimationBuilder(builder);
@@ -576,9 +551,9 @@ public class LXImageGetter {
      */
     public void getImageSdcard(final ImageView image,
                                final String path,
-                               LXImageReadSize ImageReadedSize,
+                               LXImageReadOption ImageReadedSize,
                                LXReadSDCardCallback callback) {
-        getImageSdcard(image, path, NO_PLACEHOLER, ImageReadedSize, callback);
+        getImageSdcard(image, path, null, ImageReadedSize, callback);
     }
 
 
@@ -591,9 +566,9 @@ public class LXImageGetter {
      */
     public void getImageSdcard(final ImageView image,
                                final String path,
-                               LXImageReadSize ImageReadedSize) {
+                               LXImageReadOption ImageReadedSize) {
 
-        getImageSdcard(image, path, NO_PLACEHOLER, ImageReadedSize, null);
+        getImageSdcard(image, path, null, ImageReadedSize, null);
     }
 
     /****************
@@ -607,65 +582,60 @@ public class LXImageGetter {
      */
     public void getImageSdcard(final ImageView image,
                                final String path,
-                               int placeHolder,
-                               LXImageReadSize ImageReadedSize,
-                               LXReadSDCardCallback callback
-    ) {
-
+                               Bitmap placeHolder,
+                               LXImageReadOption ImageReadedSize,
+                               LXReadSDCardCallback callback) {
+        //阻止已经运行的线程对此图片进行任何的操作
+        removeImageLoad(image);
         /* 首先清除掉图片的动画 */
         if (image != null) {
+            //清空动画
             image.clearAnimation();
-            image.setImageBitmap(bitmap);
+            if (placeHolder == null) {
+                //设置空白显示
+                image.setImageBitmap(bitmap);
+            } else {
+                //设置占位
+                image.setImageBitmap(placeHolder);
+            }
+        }
+        //绝对键值
+        String absoluteKey = NameTool.getImageAbsoluteKey(path, ImageReadedSize);
+        //获取缓存中的数据
+        Bitmap cached = mCache.getBitmapFromCache(absoluteKey);
+        // 如果缓存不为空
+        if (cached != null) {
+            // 设置到Image中去
+            if (image != null) {
+                image.setImageBitmap(cached);
+            }
+            // 直接回调完成的方法
+            if (callback != null) {
+                callback.readDone(cached);
+            }
+            // 开始动画
+            if (builder != null && image != null) {
+                Animation animation = builder.buildAnimation(image, ImageSourceType.FROM_CACHE);
+                if (animation != null) {
+                    image.startAnimation(animation);
+                }
+            }
+            // 结束
+            return;
         }
 
-        // 阻止已经运行的线程对此图片进行任何的操作
-        removeImageLoad(image);
         // 如果SD卡中已经存在了这个文件
         if (ImageReadTool.isFileExsitsAntNotDic(path)) {
-            Bitmap cached = null;
-            // 如果说没有大小的设置，那么就直接取缓存中的图片出来
-            if (ImageReadedSize == null) {
-                cached = mCache.getBitmapFromCache(path);
-            } else {
-                // 如果设置了就多加上大小
-                cached = mCache.getBitmapFromCache(path + ImageReadedSize.getSizeStrAdditional());
-            }
-            // 如果缓存不为空
-            if (cached != null) {
-                // 设置到Image中去
-                if (image != null) {
-                    image.setImageBitmap(cached);
-                }
-                // 直接回调完成的方法
-                if (callback != null) {
-                    callback.readDone(cached);
-                }
-                // 开始动画
-                if (builder != null && image != null) {
-                    Animation animation = builder.buildAnimation(image,ImageSourceType.FROM_CACHE);
-                    if (animation != null) {
-                        image.startAnimation(animation);
-                    }
-                }
-                // 结束
-                return;
-            }
-            /* 设置holder */
-
-            if (image != null && placeHolder > -1) {
-                image.setImageResource(placeHolder);
-            }
-
-            ImageReadSDCardThread thread = new ImageReadSDCardThread(image,
-                    mcontext, mCache, path, ImageReadedSize, callback);
+            //开始读取线程
+            ImageReadSDCardThread thread = new ImageReadSDCardThread(image, mcontext, mCache, path, ImageReadedSize, callback);
             // 设置下载完成显示的动画
             thread.setAnimationBuilder(builder);
             // 开始执行了
             threadpool.execute(thread);
 
         } else {
-            // 文件不存在
-            LogTool.e(TAG, "no file exsists");
+            // 返回通知文件不存在
+            callback.readError(new LDirException("no file exsists or file is directory"));
         }
     }
 

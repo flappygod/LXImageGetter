@@ -7,6 +7,5 @@ public class LXOption {
         REFRESH_CACHE
     }
 
-    public static final  int  NO_PLACEHOLER =-1;
 
 }

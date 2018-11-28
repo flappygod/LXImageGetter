@@ -5,7 +5,7 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 
-import com.flappygod.lipo.limagegetter.option.LXImageReadSize;
+import com.flappygod.lipo.limagegetter.option.LXImageReadOption;
 import com.flappygod.lipo.limagegetter.model.LXImageWH;
 
 import android.content.Context;
@@ -88,7 +88,7 @@ public class ImageReadTool {
      */
     public synchronized static Drawable readFileDrawable(Context context,
                                                          String path,
-                                                         LXImageReadSize setting) {
+                                                         LXImageReadOption setting) {
 
         // 获取InputStream
         FileInputStream fin = null;
@@ -150,7 +150,7 @@ public class ImageReadTool {
      * @throws IOException
      ***********************/
     public synchronized static Bitmap readFileBitmap(String path,
-                                                     LXImageReadSize setting) throws Exception{
+                                                     LXImageReadOption setting) throws Exception{
         // 获取InputStream
         FileInputStream fin = null;
         try {
@@ -263,7 +263,7 @@ public class ImageReadTool {
      * @param setting 设置
      ***********************/
     public synchronized static Options getOption(String path,
-                                                 LXImageReadSize setting) {
+                                                 LXImageReadOption setting) {
         // 创建设置
         Options options = new Options();
         // 设置inJustDecodeBounds为true后，decodeFile并不分配空间，此时计算原始图片的长度和宽度
@@ -304,7 +304,7 @@ public class ImageReadTool {
      ***********************/
 
     public synchronized static Bitmap imageScaleMax(Bitmap bitmap,
-                                                    LXImageReadSize setting) {
+                                                    LXImageReadOption setting) {
         int dst_w = setting.getMaxWidth();
         int dst_h = setting.getMaxHeight();
 
@@ -342,7 +342,7 @@ public class ImageReadTool {
      ***********************/
 
     public synchronized static Bitmap imageScale(Bitmap bitmap,
-                                                 LXImageReadSize setting) {
+                                                 LXImageReadOption setting) {
         int dst_w = setting.getMaxWidth();
         int dst_h = setting.getMaxHeight();
         if (dst_w <= 0 || dst_h <= 0)

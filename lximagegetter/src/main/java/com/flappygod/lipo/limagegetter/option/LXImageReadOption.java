@@ -6,13 +6,13 @@ import android.graphics.Bitmap;
 /************
  * 
  * Package Name:com.flappygod.lipo.limagegetter.model <br/> 
- * ClassName: LXImageReadSize <br/>
+ * ClassName: LXImageReadOption <br/>
  * Function: 读取图片时候的图片地区参数设置   <br/> 
  * date: 2016-3-9 下午2:04:21 <br/> 
  * 
  * @author lijunlin
  */
-public class LXImageReadSize {
+public class LXImageReadOption {
 
 	//图片读取时读取的最大宽度
 	private int  maxWidth;
@@ -26,14 +26,14 @@ public class LXImageReadSize {
 	private Bitmap.Config inPreferredConfig;
 
 	
-	public LXImageReadSize(int maxWidth, int maxHeight, boolean scaleFill) {
+	public LXImageReadOption(int maxWidth, int maxHeight, boolean scaleFill) {
 		super();
 		this.maxWidth = maxWidth;
 		this.maxHeight = maxHeight;
 		this.scaleFill = scaleFill;
 	}
 	
-	public LXImageReadSize(int maxWidth, int maxHeight, boolean scaleFill, Bitmap.Config config) {
+	public LXImageReadOption(int maxWidth, int maxHeight, boolean scaleFill, Bitmap.Config config) {
 		super();
 		this.maxWidth = maxWidth;
 		this.maxHeight = maxHeight;
@@ -41,7 +41,7 @@ public class LXImageReadSize {
 		this.inPreferredConfig=config;
 	}
 
-	public LXImageReadSize(int maxWidth, int maxHeight, boolean scaleFill, Bitmap.Config config,RadiusOption radiusOption) {
+	public LXImageReadOption(int maxWidth, int maxHeight, boolean scaleFill, Bitmap.Config config, RadiusOption radiusOption) {
 		super();
 		this.maxWidth = maxWidth;
 		this.maxHeight = maxHeight;
@@ -89,16 +89,18 @@ public class LXImageReadSize {
 
 
 	//获取附加字符串
-	public String getSizeStrAdditional(){
+	public String getOptionAdditional(){
 		String str="";
 		//拼接宽高设置
 		if(maxHeight>0||maxWidth>0) {
 			//获取size的附加字符串
 			 str =str + getMaxWidth() + "*" + getMaxHeight();
 		}
+		//图片的信息
 		if(inPreferredConfig!=null){
 			str=str+"$"+inPreferredConfig;
 		}
+		//圆角信息
 		if(radiusOption!=null){
 			str=str+"#"+radiusOption.getRadian()+"|"+radiusOption.getScaleType();
 		}

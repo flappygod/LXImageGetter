@@ -15,9 +15,8 @@ import java.net.URL;
 import com.flappygod.lipo.limagegetter.CookieHolder;
 import com.flappygod.lipo.limagegetter.animation.AnimationBuilder;
 import com.flappygod.lipo.limagegetter.callback.LXDownloadCallback;
-import com.flappygod.lipo.limagegetter.option.LXImageReadSize;
+import com.flappygod.lipo.limagegetter.option.LXImageReadOption;
 import com.flappygod.lipo.limagegetter.tools.BitMapCache;
-import com.flappygod.lipo.limagegetter.tools.BitmapRadiusTool;
 import com.flappygod.lipo.limagegetter.tools.DirTool;
 import com.flappygod.lipo.limagegetter.tools.ImageReadTool;
 import com.flappygod.lipo.limagegetter.tools.NameTool;
@@ -53,7 +52,7 @@ public class ImageDownloadThread extends Thread {
     /* 文件名称 */
     protected String imageName;
     /* 文件名称 */
-    protected LXImageReadSize ImageReadedSize;
+    protected LXImageReadOption imageReadOption;
     // 终止下载线程的标志
     private boolean threadStopFlag = false;
     // cookie
@@ -73,7 +72,7 @@ public class ImageDownloadThread extends Thread {
      */
     public ImageDownloadThread(ImageView image, Context mcontext,
                                BitMapCache cache, String url, String DIRPATH, String imageName,
-                               LXImageReadSize ImageReadedSize, LXDownloadCallback callback) {
+                               LXImageReadOption ImageReadedSize, LXDownloadCallback callback) {
         // 设置弱应用
         if (image != null)
             this.mimageview = new WeakReference<ImageView>(image);
@@ -88,7 +87,7 @@ public class ImageDownloadThread extends Thread {
         // 用户命名下载图片名称
         this.imageName = imageName;
         // 图片读取的大小设置
-        this.ImageReadedSize = ImageReadedSize;
+        this.imageReadOption = ImageReadedSize;
         // 创建handler，默认会显示加载图片
         this.handler = new ImageDownloadThreadHandler(image, urlStr, DIRPATH,
                 imageName, callback, true);
@@ -190,65 +189,48 @@ public class ImageDownloadThread extends Thread {
 
     public void run() {
 
-        // 取得这个被保存的文件名
-        String downImagePath = NameTool
-                .getImagePath(DIRPATH, urlStr, imageName);
+        // 取得当前文件的
+        String absolutePath = NameTool.getImageAbsolutePath(DIRPATH, urlStr, imageName);
+        // 取得当前文件的在缓存中的key名称
+        String absoluteKey = NameTool.getImageAbsoluteKey(DIRPATH, urlStr, imageName, imageReadOption);
 
         // 首先查看SD卡中是否存在这个文件
-        if (ImageReadTool.isFileExsitsAntNotDic(downImagePath)) {
+        if (ImageReadTool.isFileExsitsAntNotDic(absolutePath)) {
             // 存在的情况下首先判断缓存中是否存在
-            Bitmap cached = null;
-            // 如果说没有大小的设置，那么就直接取缓存中的图片出来
-            if (ImageReadedSize == null) {
-                cached = cache.getBitmapFromCache(downImagePath);
-            } else {
-                // 获取这个特定宽高的缓存
-                cached = cache.getBitmapFromCache(downImagePath + ImageReadedSize.getSizeStrAdditional());
-            }
+            Bitmap  cached = cache.getBitmapFromCache(absoluteKey);
             // 如果缓存不为空
             if (cached != null) {
                 // 直接发送过去
-                Message msg = handler
-                        .obtainMessage(
-                                ImageDownloadThreadHandler.ThreadMessageWhat.DONESDCARD.nCode,
-                                cached);
+                Message msg = handler.obtainMessage(ImageDownloadThreadHandler.ThreadMessageWhat.DONESDCARD.nCode,cached);
+                //发送消息
                 handler.sendMessage(msg);
                 // 结束
                 return;
             } else {
-
-                // 读取图片
-                Bitmap bitmap = null;
                 try {
                     // 读取图片
-                    bitmap = ImageReadTool.readFileBitmap(downImagePath,
-                            ImageReadedSize);
+                    Bitmap bitmap = ImageReadTool.readFileBitmap(absolutePath,imageReadOption);
+
+                    // 直接发送过去
+                    Message msg = handler.obtainMessage(
+                                    ImageDownloadThreadHandler.ThreadMessageWhat.DONESDCARD.nCode,
+                                    bitmap);
+                    //发送
+                    handler.sendMessage(msg);
+
+                    //添加到缓存中
+                    cache.addBitmapToCache(absoluteKey,bitmap);
+                    // 结束
+                    return;
                 } catch (Exception ex) {
                     // 直接发送过去
-                    Message msg = handler
-                            .obtainMessage(
+                    Message msg = handler.obtainMessage(
                                     ImageDownloadThreadHandler.ThreadMessageWhat.ERROR.nCode,
                                     ex);
                     handler.sendMessage(msg);
                     // 结束
                     return;
                 }
-
-                // 直接发送过去
-                Message msg = handler
-                        .obtainMessage(
-                                ImageDownloadThreadHandler.ThreadMessageWhat.DONESDCARD.nCode,
-                                bitmap);
-                handler.sendMessage(msg);
-                // 保存到缓存中
-                if (ImageReadedSize == null) {
-                    cache.addBitmapToCache(downImagePath, bitmap);
-                } else {
-                    cache.addBitmapToCache(
-                            downImagePath + ImageReadedSize.getSizeStrAdditional(), bitmap);
-                }
-                // 结束
-                return;
             }
         }
         // SD卡中不存在这张图片，那么久没办法了，只能去下载了
@@ -263,11 +245,11 @@ public class ImageDownloadThread extends Thread {
                 /**** 创建文件夹,保证需要保存到的文件夹存在 ****/
                 DirTool.createDir(DIRPATH, true);
                 /**** 获取断点续传文件 ****/
-                File logfile = new File(downImagePath + ".cfg");
+                File logfile = new File(absolutePath + ".cfg");
                 /**** 获取下载的apk文件 ****/
-                File file = new File(downImagePath + ".data");
+                File file = new File(absolutePath + ".data");
                 /**** 判断apkfile是否存在 ****/
-                File imageFile = new File(downImagePath);
+                File imageFile = new File(absolutePath);
 
                 /**** 如果两个文件都存在那么就读取log中的断点数据 ****/
                 if (logfile.exists() && file.exists()) {
@@ -369,34 +351,28 @@ public class ImageDownloadThread extends Thread {
 
                         // 读取图片
                         Bitmap bitmap = ImageReadTool.readFileBitmap(
-                                downImagePath, ImageReadedSize);
+                                absolutePath, imageReadOption);
 
                         // 直接发送过去
-                        Message msg = handler
-                                .obtainMessage(
+                        Message msg = handler.obtainMessage(
                                         ImageDownloadThreadHandler.ThreadMessageWhat.DONE.nCode,
                                         bitmap);
+                        //发送消息
                         handler.sendMessage(msg);
                         // 保存到缓存中
-                        if (ImageReadedSize == null) {
-                            cache.addBitmapToCache(downImagePath, bitmap);
-                        } else {
-                            cache.addBitmapToCache(downImagePath
-                                    + ImageReadedSize.getSizeStrAdditional(), bitmap);
-                        }
-
+                        cache.addBitmapToCache(absoluteKey, bitmap);
+                        //返回
                         return;
                     }
                     /**** 如果还没有下载完就代表是取消的 ****/
                     else {
-                        Message msg = handler
-                                .obtainMessage(ImageDownloadThreadHandler.ThreadMessageWhat.CANCEL.nCode);
+                        Message msg = handler.obtainMessage(ImageDownloadThreadHandler.ThreadMessageWhat.CANCEL.nCode);
+                        //发送
                         handler.sendMessage(msg);
                     }
                 }
             } catch (Exception e) {
-                Message msg = handler
-                        .obtainMessage(
+                Message msg = handler.obtainMessage(
                                 ImageDownloadThreadHandler.ThreadMessageWhat.ERROR.nCode,
                                 e);
                 handler.sendMessage(msg);

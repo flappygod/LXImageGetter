@@ -109,10 +109,10 @@ public class BitMapCache {
             private static final long serialVersionUID = 6040103833179403725L;
 
             @Override
-            protected boolean removeEldestEntry(
-                    Entry<String, SoftReference<Bitmap>> eldest) {
+            protected boolean removeEldestEntry(java.util.Map.Entry<String, SoftReference<Bitmap>> eldest) {
                 // 大于的时候开始remove
                 if (size() > SOFT_CACHE_SIZE) {
+                    //移除成功
                     return true;
                 }
                 return false;
