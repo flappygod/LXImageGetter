@@ -66,8 +66,7 @@ public class ImageReadSDCardThreadHandler extends Handler {
 			LXReadSDCardCallback callBack, boolean showImageFlag) {
 		super();
 		// 弱引用
-		if (image != null)
-			this.mimageview = new WeakReference<ImageView>(image);
+		this.mimageview = (image != null ? new WeakReference<ImageView>(image) : null);
 		// 下载地址
 		this.path = path;
 		// 回调
