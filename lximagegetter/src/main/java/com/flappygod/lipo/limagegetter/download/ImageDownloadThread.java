@@ -231,7 +231,7 @@ public class ImageDownloadThread extends Thread {
             // 如果缓存不为空
             if (cached != null) {
                 // 直接发送过去
-                Message msg = handler.obtainMessage(ImageDownloadThreadHandler.ThreadMessageWhat.DONESDCARD.nCode, cached);
+                Message msg = handler.obtainMessage(ImageDownloadThreadHandler.ThreadMessageWhat.DONECACHE.nCode, cached);
                 //发送消息
                 handler.sendMessage(msg);
                 // 结束
@@ -268,7 +268,7 @@ public class ImageDownloadThread extends Thread {
                         // 读取图片
                         Bitmap bitmap = ImageReadTool.readFileBitmap(absolutePath, imageReadOption);
                         // 直接发送过去
-                        Message msg = handler.obtainMessage(ImageDownloadThreadHandler.ThreadMessageWhat.DONE.nCode, bitmap);
+                        Message msg = handler.obtainMessage(ImageDownloadThreadHandler.ThreadMessageWhat.DONENET.nCode, bitmap);
                         //发送消息
                         handler.sendMessage(msg);
                         // 保存到缓存中

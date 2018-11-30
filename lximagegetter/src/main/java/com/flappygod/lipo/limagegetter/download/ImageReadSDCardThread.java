@@ -54,7 +54,7 @@ public class ImageReadSDCardThread extends Thread {
 								 LXImageReadOption ImageReadedSize,
 								 LXReadSDCardCallback callback) {
 		// 设置弱应用
-		this.mimageview = new WeakReference<ImageView>(image);
+		this.mimageview = (image != null ? new WeakReference<ImageView>(image) : null);
 		// 存储文件夹
 		this.path = path;
 		// 缓存

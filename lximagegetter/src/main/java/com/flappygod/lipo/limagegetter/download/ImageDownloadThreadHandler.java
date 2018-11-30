@@ -67,8 +67,7 @@ public class ImageDownloadThreadHandler extends Handler {
                                       boolean showImageFlag) {
         super();
         // 弱引用
-        if (image != null)
-            this.mimageview = new WeakReference<ImageView>(image);
+        this.mimageview = (image != null ? new WeakReference<ImageView>(image) : null);
         // 下载地址
         this.urlStr = urlStr;
         // 下载文件夹
@@ -83,7 +82,7 @@ public class ImageDownloadThreadHandler extends Handler {
 
     // 返回过来的消息的类型
     public enum ThreadMessageWhat {
-        ERROR(0), DONE(1), CANCEL(2), DOWNLOADING(3), DONESDCARD(4);
+        ERROR(0), DONENET(1), CANCEL(2), DOWNLOADING(3), DONESDCARD(4), DONECACHE(5);
         // 定义私有变量
         public final int nCode;
 
@@ -107,7 +106,7 @@ public class ImageDownloadThreadHandler extends Handler {
             }
         }
         // 下载完成
-        else if (msg.what == ThreadMessageWhat.DONE.nCode) {
+        else if (msg.what == ThreadMessageWhat.DONENET.nCode) {
             if (showImageFlag) {
                 ImageView imageview = (mimageview != null ? mimageview.get(): null);
                 // 获取imageView,设置图片
@@ -138,6 +137,27 @@ public class ImageDownloadThreadHandler extends Handler {
                 // 开始动画
                 if (builder != null && imageview != null) {
                     Animation animation = builder.buildAnimation(imageview, ImageSourceType.FROM_SDCARD);
+                    if (animation != null) {
+                        imageview.startAnimation(animation);
+                    }
+                }
+            }
+            // 回调
+            if (callBack != null) {
+                callBack.downLoadReady(urlStr, NameTool.getImageAbsolutePath(mDirpath, urlStr, imageName), (Bitmap) msg.obj);
+            }
+        }
+        // 从CACHE读取完成的
+        else if (msg.what == ThreadMessageWhat.DONECACHE.nCode) {
+            if (showImageFlag) {
+                ImageView imageview = (mimageview != null ? mimageview.get() : null);
+                // 获取imageView,设置图片
+                if (imageview != null && msg.obj != null && msg.obj instanceof Bitmap) {
+                    imageview.setImageBitmap((Bitmap) msg.obj);
+                }
+                // 开始动画
+                if (builder != null && imageview != null) {
+                    Animation animation = builder.buildAnimation(imageview, ImageSourceType.FROM_CACHE);
                     if (animation != null) {
                         imageview.startAnimation(animation);
                     }
