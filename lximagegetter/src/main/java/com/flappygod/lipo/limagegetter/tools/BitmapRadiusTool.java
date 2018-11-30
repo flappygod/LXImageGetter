@@ -7,7 +7,6 @@ import android.graphics.PorterDuff;
 import android.graphics.PorterDuffXfermode;
 import android.graphics.Rect;
 import android.graphics.RectF;
-import android.widget.ImageView;
 
 import com.flappygod.lipo.limagegetter.option.RadiusOption;
 
@@ -28,7 +27,7 @@ public class BitmapRadiusTool {
         //目标的rect
         Rect destRect = new Rect(0, 0, bitmap.getWidth(), bitmap.getHeight());
         //截取的话
-        if (option.getScaleType()== RadiusOption.ScaleType.CENTER_CROP_RADIUS) {
+        if (option.getScaleType() == RadiusOption.ScaleType.RADIUS_CENTER_CROP) {
             //宽高比为1.0,进行切割
             float whscale =  1.0f;
             float whbScale = (float) bitmap.getWidth() / (float) bitmap.getHeight();
@@ -44,22 +43,109 @@ public class BitmapRadiusTool {
                 srcRect = new Rect(left, 0, bitmap.getWidth() - left, bitmap.getHeight());
                 destRect = new Rect(0, 0, bitmap.getWidth() - 2 * left, bitmap.getHeight());
             }
+            Bitmap output = Bitmap.createBitmap(destRect.width(), destRect.height(), Bitmap.Config.ARGB_8888);
+            //创建canvas
+            Canvas canvas = new Canvas(output);
+            //绘制
+            canvas.drawARGB(0, 0, 0, 0);
+            //corner
+            float roundPx = option.getRadian() * Math.min(bitmap.getHeight(), bitmap.getWidth());
+            //创建paint
+            Paint paint = new Paint();
+            //锯齿
+            paint.setAntiAlias(true);
+            //颜色
+            paint.setColor(color);
+            //Rect
+            RectF rectF = new RectF(destRect);
+            //绘制
+            canvas.drawRoundRect(rectF, roundPx, roundPx, paint);
+            //设置
+            paint.setXfermode(new PorterDuffXfermode(PorterDuff.Mode.SRC_IN));
+            //绘图
+            canvas.drawBitmap(bitmap, srcRect, destRect, paint);
+            return output;
+
+        } else if (option.getScaleType() == RadiusOption.ScaleType.RADIUS_WIDTH) {
+            Bitmap output = Bitmap.createBitmap(destRect.width(), destRect.height(), Bitmap.Config.ARGB_8888);
+            //创建canvas
+            Canvas canvas = new Canvas(output);
+            //绘制
+            canvas.drawARGB(0, 0, 0, 0);
+            //corner
+            float roundPx = option.getRadian() * bitmap.getWidth();
+            //corner
+            float roundPy = option.getRadian() * bitmap.getWidth();
+            //创建paint
+            Paint paint = new Paint();
+            //锯齿
+            paint.setAntiAlias(true);
+            //颜色
+            paint.setColor(color);
+            //Rect
+            RectF rectF = new RectF(destRect);
+            //绘制
+            canvas.drawRoundRect(rectF, roundPx, roundPy, paint);
+            //设置
+            paint.setXfermode(new PorterDuffXfermode(PorterDuff.Mode.SRC_IN));
+            //绘图
+            canvas.drawBitmap(bitmap, srcRect, destRect, paint);
+            return output;
+
+        } else if (option.getScaleType() == RadiusOption.ScaleType.RADIUS_HEIGHT) {
+
+            Bitmap output = Bitmap.createBitmap(destRect.width(), destRect.height(), Bitmap.Config.ARGB_8888);
+            //创建canvas
+            Canvas canvas = new Canvas(output);
+            //绘制
+            canvas.drawARGB(0, 0, 0, 0);
+            //corner
+            float roundPx = option.getRadian() * bitmap.getHeight();
+            //corner
+            float roundPy = option.getRadian() * bitmap.getHeight();
+            //创建paint
+            Paint paint = new Paint();
+            //锯齿
+            paint.setAntiAlias(true);
+            //颜色
+            paint.setColor(color);
+            //Rect
+            RectF rectF = new RectF(destRect);
+            //绘制
+            canvas.drawRoundRect(rectF, roundPx, roundPy, paint);
+            //设置
+            paint.setXfermode(new PorterDuffXfermode(PorterDuff.Mode.SRC_IN));
+            //绘图
+            canvas.drawBitmap(bitmap, srcRect, destRect, paint);
+            return output;
+        } else if (option.getScaleType() == RadiusOption.ScaleType.RADIUS_ELLIPSE) {
+
+            Bitmap output = Bitmap.createBitmap(destRect.width(), destRect.height(), Bitmap.Config.ARGB_8888);
+            //创建canvas
+            Canvas canvas = new Canvas(output);
+            //绘制
+            canvas.drawARGB(0, 0, 0, 0);
+            //corner
+            float roundPx = option.getRadian() * bitmap.getWidth();
+            //corner
+            float roundPy = option.getRadian() * bitmap.getHeight();
+            //创建paint
+            Paint paint = new Paint();
+            //锯齿
+            paint.setAntiAlias(true);
+            //颜色
+            paint.setColor(color);
+            //Rect
+            RectF rectF = new RectF(destRect);
+            //绘制
+            canvas.drawRoundRect(rectF, roundPx, roundPy, paint);
+            //设置
+            paint.setXfermode(new PorterDuffXfermode(PorterDuff.Mode.SRC_IN));
+            //绘图
+            canvas.drawBitmap(bitmap, srcRect, destRect, paint);
+            return output;
         }
-        Bitmap output = Bitmap.createBitmap(destRect.width(),
-                destRect.height(), Bitmap.Config.ARGB_8888);
-        //创建canvas
-        Canvas canvas = new Canvas(output);
-        canvas.drawARGB(0, 0, 0, 0);
-        //corner
-        float roundPx = option.getRadian() * Math.min(bitmap.getHeight(), bitmap.getWidth());
-        Paint paint = new Paint();
-        paint.setAntiAlias(true);
-        paint.setColor(color);
-        RectF rectF = new RectF(destRect);
-        canvas.drawRoundRect(rectF, roundPx, roundPx, paint);
-        paint.setXfermode(new PorterDuffXfermode(PorterDuff.Mode.SRC_IN));
-        canvas.drawBitmap(bitmap, srcRect, destRect, paint);
-        return output;
+        return null;
     }
 
 }

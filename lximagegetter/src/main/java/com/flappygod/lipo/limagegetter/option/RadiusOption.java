@@ -14,7 +14,7 @@ public class RadiusOption {
 
     public   RadiusOption(float radian){
         this.radian=radian;
-        this.scaleType=ScaleType.CENTER_CROP_RADIUS;
+        this.scaleType = ScaleType.RADIUS_CENTER_CROP;
     }
 
     public   RadiusOption(float radian,ScaleType type){
@@ -22,15 +22,20 @@ public class RadiusOption {
         this.scaleType=type;
     }
 
-
     public enum ScaleType {
         //图片先进行切割，保证宽高一致
-        CENTER_CROP_RADIUS (1),
-        //不进行切割，直接设置radius
-        NO_CROP_RADIUS(2);
+        RADIUS_CENTER_CROP(1),
+        //以宽度作为圆角基础
+        RADIUS_WIDTH(2),
+        //以宽度作为圆角基础
+        RADIUS_HEIGHT(3),
+        //以宽度作为圆角基础
+        RADIUS_ELLIPSE(4);
+
         ScaleType(int ni) {
             nativeInt = ni;
         }
+
         final int nativeInt;
     }
 
